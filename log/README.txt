@@ -1,0 +1,1 @@
+The application create a file [send-mass-email.log] in this folder
