@@ -45,10 +45,10 @@ class Sender:
         try:
             with open("../templates/{name_template}/index.html".format(name_template = self.templateHelper.name), encoding=self.file_encoding) as fp:
                 message_html = fp.read()
-
                 msg.add_alternative(message_html.format(name_client=name_client, date_now=date_now, time_now=time_now), subtype='html')
         except IOError as e:
-            print("Problem open template : {}".format(e))
+            raise IOError("Problem open template : {}".format(e))
+
         server = smtplib.SMTP(self.smtp_host, self.smtp_host_port)
         server.ehlo()
         server.starttls()
@@ -56,7 +56,6 @@ class Sender:
 
         #Next, log in to the server
         server.login(self.smtp_account_username, self.smtp_account_password)
-
 
         server.send_message(msg)
         server.quit()

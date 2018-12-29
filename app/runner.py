@@ -2,9 +2,12 @@
 '''
 
 '''
+import sys
 import csv
 import smtplib
 import shutil
+import logging
+from logging.handlers import RotatingFileHandler
 
 from email.message import EmailMessage
 import datetime
@@ -13,6 +16,18 @@ from model.client import Client
 from config.config import Config
 from send.sender import Sender
 from helper.templateHelper import TemplateHelper
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+LOG_FILENAME = '../log/send-mass-email.log'
+handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=10485760, backupCount=5)
+logger.addHandler(handler)
+
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
 
 config = Config()
 
@@ -72,26 +87,31 @@ def _read_and_process_data(templateHelper):
                     client_dict = client.to_dict()
                     try:
                         sender.sendMessage(client)
+                    except smtplib.SMTPRecipientsRefused as rR:
+                        logger.error(rR)
+                    except IOError as e:
+                        logger.error(e)
+                        sys.exit(1) # Not found template
                     except:
-                        print("Problem sending email for client : {} ".format(client.to_string()))
+                        logger.error("Problem sending email for client : {} ".format(client.to_string()))
                         value = 'KO'
                     else:
-                        print('mail to {} <{}> successfully sent'.format(client.contact, client.email)) 
+                        logger.debug('mail to {} <{}> successfully send success'.format(client.contact, client.email)) 
                         value = 'OK'
 
                     client_dict['result'] = value
-                    print(client_dict)
                     writer.writerow(client_dict)
                 line_count += 1
                 
-            print(f'Processed {line_count - 1} lines.')
+            logger.info(f'Processed {line_count - 1} mails.')
 
         _move_file_to_processed_directory(name_file_working)
 
 
 if __name__ == '__main__':
+    logger.info("Start application")
     templateHelper = TemplateHelper("campaign-01")
 
     _read_and_process_data(templateHelper)
     
-    print("End process")
+    logger.info("End application")
