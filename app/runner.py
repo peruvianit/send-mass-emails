@@ -89,6 +89,7 @@ def _read_and_process_data(templateHelper):
                         sender.sendMessage(client)
                     except smtplib.SMTPRecipientsRefused as rR:
                         logger.error(rR)
+                        value = 'KO'
                     except IOError as e:
                         logger.error(e)
                         sys.exit(1) # Not found template
