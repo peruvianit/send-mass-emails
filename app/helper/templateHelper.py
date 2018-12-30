@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 class TemplateHelper:
     def __init__(self, name_template):
-        self.name = name_template
+        self.name_template = name_template
         with open('../templates/{}/template.xml'.format(name_template)) as infile:
             blob = infile.read()
         # Use LXML for blazing speed

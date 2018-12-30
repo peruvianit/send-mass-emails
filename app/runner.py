@@ -59,8 +59,8 @@ def _create_name_file_working(file_name):
     return file_name.replace(".csv","_{}_{}.tmp".format(date_now,time_now))
 
 
-def _move_file_to_processed_directory(name_file_working):
-    shutil.move("../data/working/{}".format(name_file_working), "../data/processed/{}".format(name_file_working.replace(".tmp",".csv")))
+def _move_file_to_processed_directory(name_file_working, name_template):
+    shutil.move("../data/working/{}".format(name_file_working), "../data/processed/{name_template}_{filename}".format(name_template=name_template, filename=name_file_working.replace(".tmp",".csv")))
 
 
 def _read_and_process_data(templateHelper):
@@ -112,7 +112,7 @@ def _read_and_process_data(templateHelper):
                 
             logger.info(f'Processed {line_count - 1} mails.')
 
-        _move_file_to_processed_directory(name_file_working)
+        _move_file_to_processed_directory(name_file_working, templateHelper.name_template)
 
 
 def _getTemplate():

@@ -43,7 +43,7 @@ class Sender:
         # message as the second part.
 
         try:
-            with open("../templates/{name_template}/index.html".format(name_template = self.templateHelper.name), encoding=self.file_encoding) as fp:
+            with open("../templates/{name_template}/index.html".format(name_template = self.templateHelper.name_template), encoding=self.file_encoding) as fp:
                 message_html = fp.read()
                 msg.add_alternative(message_html.format(name_client=name_client, date_now=date_now, time_now=time_now), subtype='html')
         except IOError as e:
