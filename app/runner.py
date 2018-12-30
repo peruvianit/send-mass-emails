@@ -17,6 +17,8 @@ from config.config import Config
 from send.sender import Sender
 from helper.templateHelper import TemplateHelper
 from helper.fileHelper import FileHelper
+from helper.applicationHelper import wellcome
+from grafic.progressBar import ProgressBar
 
 
 logger = logging.getLogger(__name__)
@@ -32,6 +34,7 @@ handler.setFormatter(formatter)
 
 config = Config()
 
+p = ProgressBar('==> send email...')
 
 def _get_client(row):
     """ 
@@ -82,6 +85,7 @@ def _read_and_process_data(templateHelper):
             
             client_dict = {}
             value = ''
+            numRows = 3
             for row in csv_reader:
                 if line_count > 0:
                     client = _get_client(row)
@@ -99,10 +103,11 @@ def _read_and_process_data(templateHelper):
                     else:
                         logger.debug('mail to {} <{}> successfully send success'.format(client.contact, client.email)) 
                         value = 'OK'
-                        
+
                     client_dict = client.to_dict()
                     client_dict['result'] = value
                     writer.writerow(client_dict)
+                    p.calculateAndUpdate(line_count, numRows)
                 line_count += 1
                 
             logger.info(f'Processed {line_count - 1} mails.')
@@ -141,6 +146,8 @@ def _finish():
 
 if __name__ == '__main__':
     logger.info("Start application")
+
+    print(wellcome())
 
     name_template = _getTemplate()
 
