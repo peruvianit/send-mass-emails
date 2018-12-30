@@ -16,6 +16,7 @@ from model.client import Client
 from config.config import Config
 from send.sender import Sender
 from helper.templateHelper import TemplateHelper
+from helper.fileHelper import FileHelper
 
 
 logger = logging.getLogger(__name__)
@@ -84,7 +85,6 @@ def _read_and_process_data(templateHelper):
             for row in csv_reader:
                 if line_count > 0:
                     client = _get_client(row)
-                    client_dict = client.to_dict()
                     try:
                         sender.sendMessage(client)
                     except smtplib.SMTPRecipientsRefused as rR:
@@ -99,7 +99,8 @@ def _read_and_process_data(templateHelper):
                     else:
                         logger.debug('mail to {} <{}> successfully send success'.format(client.contact, client.email)) 
                         value = 'OK'
-
+                        
+                    client_dict = client.to_dict()
                     client_dict['result'] = value
                     writer.writerow(client_dict)
                 line_count += 1
@@ -109,10 +110,44 @@ def _read_and_process_data(templateHelper):
         _move_file_to_processed_directory(name_file_working)
 
 
+def _getTemplate():
+    print('Select an template :\n ')
+    fileHelper = FileHelper()
+
+    directories = fileHelper.list_directories("../templates/")
+
+    for idx, directory in enumerate(directories):
+        print('{}) {}'.format(idx +1 , directory))
+
+    print('\nwrite [exit] for exit application\n')
+
+    while True:
+        opt=input('Select an number of the list : ')    
+
+        if (opt.upper() == 'EXIT'):
+            return None
+        elif (not opt.isdigit()):
+            continue            
+        else:
+            if (int(opt) >= 1 and int(opt) <= len(directories) ):
+                return directories[int(opt)-1]
+            else:                
+                continue
+
+
+def _finish():
+    print("\n\n==> End application success")
+
+
 if __name__ == '__main__':
     logger.info("Start application")
-    templateHelper = TemplateHelper("campaign-01")
 
-    _read_and_process_data(templateHelper)
+    name_template = _getTemplate()
+
+    if (not name_template == None):
+        templateHelper = TemplateHelper(name_template)
+
+        _read_and_process_data(templateHelper)
     
-    logger.info("End application")
+    _finish()
+    logger.info("End application success")
