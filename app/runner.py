@@ -63,6 +63,15 @@ def _move_file_to_processed_directory(name_file_working, name_template):
     shutil.move("../data/working/{}".format(name_file_working), "../data/processed/{name_template}_{filename}".format(name_template=name_template, filename=name_file_working.replace(".tmp",".csv")))
 
 
+def _get_lines_csv_reader(name_file_data_email):
+    with open("../data/input/{}".format(name_file_data_email)) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=';')
+        for idx, row in enumerate(csv_reader):
+            pass
+
+    return idx
+
+
 def _read_and_process_data(templateHelper):
     """
         Reading file csv, before an file with success
@@ -85,7 +94,8 @@ def _read_and_process_data(templateHelper):
             
             client_dict = {}
             value = ''
-            numRows = 3
+            numRows = _get_lines_csv_reader(name_file_data_email)
+            
             for row in csv_reader:
                 if line_count > 0:
                     client = _get_client(row)
@@ -107,6 +117,7 @@ def _read_and_process_data(templateHelper):
                     client_dict = client.to_dict()
                     client_dict['result'] = value
                     writer.writerow(client_dict)
+
                     p.calculateAndUpdate(line_count, numRows)
                 line_count += 1
                 
