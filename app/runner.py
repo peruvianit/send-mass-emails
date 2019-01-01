@@ -7,6 +7,7 @@ import csv
 import smtplib
 import shutil
 import logging
+import argparse
 from logging.handlers import RotatingFileHandler
 
 from email.message import EmailMessage
@@ -155,17 +156,36 @@ def _finish():
     print("\n\n==> End application success")
 
 
+def _synchronize():
+    print("_synchronize")
+
+
+def _clear():
+    print("_clear")
+
+
 if __name__ == '__main__':
     logger.info("Start application")
 
-    print(wellcome())
+    parser = argparse.ArgumentParser( prog = "send-mass-emails", description = "Application sending mass email with data into file csv")
+    parser.add_argument("-s","--sync", help = "Synchronize emails to verify if they are valid", action = "store_true")
+    parser.add_argument("-c","--clear", help = "Clean all unusuable files", action = "store_true")
+    parser.add_argument("-v","--version", action='version', version='%(prog)s 1.0.0')
 
-    name_template = _getTemplate()
+    args = parser.parse_args()
 
-    if (not name_template == None):
-        templateHelper = TemplateHelper(name_template)
+    if args.sync:
+        _synchronize()
+    elif args.clear:
+        _clear()
+    else:
+        print(wellcome())
+        name_template = _getTemplate()
 
-        _read_and_process_data(templateHelper)
-    
-    _finish()
+        if (not name_template == None):
+            templateHelper = TemplateHelper(name_template)
+
+            _read_and_process_data(templateHelper)
+
+        _finish()
     logger.info("End application success")
