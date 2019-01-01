@@ -168,8 +168,10 @@ if __name__ == '__main__':
     logger.info("Start application")
 
     parser = argparse.ArgumentParser( prog = "send-mass-emails", description = "Application sending mass email with data into file csv")
-    parser.add_argument("-s","--sync", help = "Synchronize emails to verify if they are valid", action = "store_true")
-    parser.add_argument("-c","--clear", help = "Clean all unusuable files", action = "store_true")
+
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-s","--sync", help = "Synchronize emails to verify if they are valid", action = "store_true")
+    group.add_argument("-c","--clear", help = "Clean all unusuable files", action = "store_true")
     parser.add_argument("-v","--version", action='version', version='%(prog)s 1.0.0')
 
     args = parser.parse_args()
