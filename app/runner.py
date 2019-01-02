@@ -20,6 +20,7 @@ from helper.templateHelper import TemplateHelper
 from helper.fileHelper import FileHelper
 from helper.applicationHelper import wellcome
 from grafic.progressBar import ProgressBar
+from enumApp.stateClient import StateClient
 
 
 logger = logging.getLogger(__name__)
@@ -41,15 +42,15 @@ def _get_client(row):
     """ 
         Creating Client with the row of the file csv 
     """
+    id = row[0]
+    ruc = row[1]
+    enterprise = row[2]
+    contact = row[3]
+    phone = row[4]
+    email = row[5]
+    state = row[6]
 
-    ruc = row[0]
-    enterprise = row[1]
-    contact = row[2]
-    phone = row[3]
-    email = row[4]
-
-    client = Client(ruc,enterprise,contact,phone,email)
-
+    client = Client(id,ruc,enterprise,contact,phone,email,state)
     return client
 
 
@@ -92,28 +93,31 @@ def _read_and_process_data(templateHelper):
             writer = csv.DictWriter(csv_file_writer, fieldnames=Client.columns_name())
 
             writer.writeheader()
-            
             client_dict = {}
             value = ''
             numRows = _get_lines_csv_reader(name_file_data_email)
-            
             for row in csv_reader:
                 if line_count > 0:
                     client = _get_client(row)
-                    try:
-                        sender.sendMessage(client)
-                    except smtplib.SMTPRecipientsRefused as rR:
-                        logger.error(rR)
-                        value = 'KO'
-                    except IOError as e:
-                        logger.error(e)
-                        sys.exit(1) # Not found template
-                    except:
-                        logger.error("Problem sending email for client : {} ".format(client.to_string()))
-                        value = 'KO'
+
+                    if client.state != StateClient.ACTIVE.value:
+                        logger.debug('mail to {} <{}> not send but the state is {}'.format(client.contact, client.email, client.state))
+                        value = '--'
                     else:
-                        logger.debug('mail to {} <{}> successfully send success'.format(client.contact, client.email)) 
-                        value = 'OK'
+                        try:
+                            sender.sendMessage(client)
+                        except smtplib.SMTPRecipientsRefused as rR:
+                            logger.error(rR)
+                            value = 'KO'
+                        except IOError as e:
+                            logger.error(e)
+                            sys.exit(1) # Not found template
+                        except:
+                            logger.error("Problem sending email for client : {} ".format(client.to_string()))
+                            value = 'KO'
+                        else:
+                            logger.debug('mail to {} <{}> successfully send success'.format(client.contact, client.email)) 
+                            value = 'OK'
 
                     client_dict = client.to_dict()
                     client_dict['result'] = value
