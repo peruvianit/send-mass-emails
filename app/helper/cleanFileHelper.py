@@ -39,16 +39,17 @@ class CleanFileHelper:
             files_old = fileHelper.get_files_old(number_of_days, "../{}".format(directory), star_file_name)
             files_working += files_old
 
-        date_now =f"{datetime.datetime.now():%Y%m%d}"
-        time_now =f"{datetime.datetime.now():%H%M}"
-        send_mass_emails_zip = zipfile.ZipFile('../storage/send_mass_email_{date_now}_{time_now}.zip'.format(date_now = date_now,time_now = time_now ), 'w')
+        if len(files_working)>0:
+            date_now =f"{datetime.datetime.now():%Y%m%d}"
+            time_now =f"{datetime.datetime.now():%H%M}"
+            send_mass_emails_zip = zipfile.ZipFile('../storage/send_mass_email_{date_now}_{time_now}.zip'.format(date_now = date_now,time_now = time_now ), 'w')
 
-        for file in files_working:
-            send_mass_emails_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
+            for file in files_working:
+                send_mass_emails_zip.write(file, compress_type=zipfile.ZIP_DEFLATED)
 
-        send_mass_emails_zip.close()
+            send_mass_emails_zip.close()
 
-        for file in files_working:
-                self.remove(file)
+            for file in files_working:
+                    self.remove(file)
 
         return (len(files_old),files_working)
