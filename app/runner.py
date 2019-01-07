@@ -19,6 +19,7 @@ from send.sender import Sender
 from helper.templateHelper import TemplateHelper
 from helper.fileHelper import FileHelper
 from helper.applicationHelper import wellcome
+from helper.regularExpressionHelper import RegularExpressionHelper
 from grafic.progressBar import ProgressBar
 from enumApp.stateClient import StateClient
 
@@ -42,6 +43,7 @@ def _get_client(row):
     """ 
         Creating Client with the row of the file csv 
     """
+
     id = row[0]
     ruc = row[1]
     enterprise = row[2]
@@ -78,7 +80,7 @@ def _read_and_process_data(templateHelper):
     """
         Reading file csv, before an file with success
     """
-    sender  = Sender(config, templateHelper)
+    sender = Sender(config, templateHelper)
 
     name_file_data_email = config.name_file_data_email
 
@@ -90,7 +92,7 @@ def _read_and_process_data(templateHelper):
         name_file_working = _create_name_file_working(name_file_data_email)
 
         with open('../data/working/{}'.format(name_file_working), mode='w', newline='') as csv_file_writer:
-            writer = csv.DictWriter(csv_file_writer, fieldnames=Client.columns_name())
+            writer = csv.DictWriter(csv_file_writer, fieldnames=Client.columns_name(), delimiter =";")
 
             writer.writeheader()
             client_dict = {}
@@ -161,8 +163,53 @@ def _finish():
 
 
 def _synchronize():
-    print("_synchronize")
+    """
+        Reading file csv, for synchronizer emails
+    """
+    sender = Sender(config)
 
+    name_file_data_email = config.name_file_data_email
+
+    with open("../data/input/{}".format(name_file_data_email)) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=';')
+
+        line_count = 0
+
+        name_file_working = _create_name_file_working(name_file_data_email)
+
+        regularExpressionHelper = RegularExpressionHelper()
+
+        with open('../data/input/{}'.format(name_file_working), mode='w', newline='') as csv_file_writer:
+            writer = csv.DictWriter(csv_file_writer, fieldnames=Client.columns_name_synchronizer(), delimiter =";")
+
+            writer.writeheader()
+            client_dict = {}
+            numRows = _get_lines_csv_reader(name_file_data_email)
+            for row in csv_reader:
+                if line_count > 0:
+                    client = _get_client(row)
+
+                    state = ''
+                    if (regularExpressionHelper.match('email', client.email)):
+                        if (sender.verify_email(client.email)):
+                            state = StateClient.ACTIVE.value
+                        else:
+                            state = StateClient.WRONG.value
+                    else:
+                        state = StateClient.CORRUPT.value
+
+                    client_dict = client.to_dict()
+                    client_dict['state'] = state
+                    writer.writerow(client_dict)
+
+                    p.calculateAndUpdate(line_count, numRows)
+                line_count += 1
+                
+            logger.info(f'Processed {line_count - 1} mails.')
+
+    shutil.move('../data/input/{}'.format(name_file_data_email),'../data/input/{}'.format(name_file_working).replace(".tmp",".bck"))
+    shutil.move('../data/input/{}'.format(name_file_working),"../data/input/{}".format(name_file_data_email))
+        
 
 def _clear():
     print("_clear")

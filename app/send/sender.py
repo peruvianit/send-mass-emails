@@ -8,8 +8,10 @@ import smtplib
 from email.message import EmailMessage
 import datetime
 
+from validate_email import validate_email
+
 class Sender:    
-    def __init__(self, config, templateHelper):
+    def __init__(self, config, templateHelper = None):
         self.file_encoding = config.file_encoding
         self.smtp_host = config.smtp_host
         self.smtp_host_port = config.smtp_host_port
@@ -52,10 +54,13 @@ class Sender:
         server = smtplib.SMTP(self.smtp_host, self.smtp_host_port)
         server.ehlo()
         server.starttls()
-        server.ehlo()
 
         #Next, log in to the server
         server.login(self.smtp_account_username, self.smtp_account_password)
 
         server.send_message(msg)
         server.quit()
+
+
+    def verify_email(self, email):
+        return True # TO DO 

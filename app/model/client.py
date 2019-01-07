@@ -13,7 +13,12 @@ class Client:
 
     @staticmethod
     def columns_name():
-        return ['id', 'ruc', 'enterprise', 'contact', 'phone', 'email','result', 'state']
+        return ['id', 'ruc', 'enterprise', 'contact', 'phone', 'email', 'state','result']
+
+
+    @staticmethod
+    def columns_name_synchronizer():
+        return ['id', 'ruc', 'enterprise', 'contact', 'phone', 'email', 'state']
 
 
     def to_dict(self):
