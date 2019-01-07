@@ -18,10 +18,11 @@ from config.config import Config
 from send.sender import Sender
 from helper.templateHelper import TemplateHelper
 from helper.fileHelper import FileHelper
-from helper.applicationHelper import wellcome
+from helper.applicationHelper import *
 from helper.regularExpressionHelper import RegularExpressionHelper
 from grafic.progressBar import ProgressBar
 from enumApp.stateClient import StateClient
+from exception.sendMailException import SendMailException
 
 
 logger = logging.getLogger(__name__)
@@ -108,6 +109,9 @@ def _read_and_process_data(templateHelper):
                     else:
                         try:
                             sender.sendMessage(client)
+                        except SendMailException as sEx:
+                            logger.fatal(sEx)
+                            raise
                         except smtplib.SMTPRecipientsRefused as rR:
                             logger.error(rR)
                             value = 'KO'
@@ -159,7 +163,7 @@ def _getTemplate():
 
 
 def _finish():
-    print("\n\n==> End application success")
+     logger.info("End application success")
 
 
 def _synchronize():
@@ -229,16 +233,23 @@ if __name__ == '__main__':
 
     if args.sync:
         _synchronize()
+        print('\nSynchronization completed successfully')
     elif args.clear:
         _clear()
+        print('\ncleaning completed successfully')
     else:
         print(wellcome())
         name_template = _getTemplate()
 
         if (not name_template == None):
-            templateHelper = TemplateHelper(name_template)
-
-            _read_and_process_data(templateHelper)
+            try:
+                templateHelper = TemplateHelper(name_template)
+                _read_and_process_data(templateHelper)
+                print('\nSending emails successfully completed')
+            except SendMailException as sEx:
+                logger.fatal(sEx)
+                error_application(sEx)
+            
 
         _finish()
-    logger.info("End application success")
+   

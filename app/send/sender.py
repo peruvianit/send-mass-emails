@@ -7,6 +7,7 @@ import smtplib
 
 from email.message import EmailMessage
 import datetime
+from exception.sendMailException import SendMailException
 
 from validate_email import validate_email
 
@@ -36,7 +37,12 @@ class Sender:
 
         """)
 
-        msg['Subject'] = self.templateHelper.get_title_template()
+        try:
+            subject = self.templateHelper.get_title_template()
+            msg['Subject'] = subject
+        except SendMailException as sEx :
+            raise SendMailException(sEx)
+
         msg['From'] = self.smtp_account_from
         msg['To'] = email_client
 

@@ -32,3 +32,18 @@ def wellcome():
 https://github.com/peruvianit/
 
  """)
+
+def error_application(message):
+        print(""" 
+         _______
+        |.-----.|
+        ||x . x||
+        ||_.-._||
+        `--)-(--`
+       __[=== o]___
+      |:::::::::::|\ 
+       -=========- () 
+
+      ERROR : {message}
+
+ """.format(message = message))
