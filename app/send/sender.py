@@ -9,8 +9,6 @@ from email.message import EmailMessage
 import datetime
 from exception.sendMailException import SendMailException
 
-from validate_email import validate_email
-
 class Sender:    
     def __init__(self, config, templateHelper = None):
         self.file_encoding = config.file_encoding

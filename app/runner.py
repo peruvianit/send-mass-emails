@@ -23,7 +23,7 @@ from helper.regularExpressionHelper import RegularExpressionHelper
 from grafic.progressBar import ProgressBar
 from enumApp.stateClient import StateClient
 from exception.sendMailException import SendMailException
-
+from helper.cleanFileHelper import CleanFileHelper
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -216,7 +216,21 @@ def _synchronize():
         
 
 def _clear():
-    print("_clear")
+    logger.info("Start cleannig olds files")
+    cleanFileHelper = CleanFileHelper()
+
+    number_days_old_passed = config.number_days_old_passed
+
+    if not number_days_old_passed.isdigit():
+        raise SendMailException("The property NUMBER_DAYS_OLD_PASSED into file config.ini not is a number : [{}]".format(number_days_old_passed))
+
+    directories_storages = config.directories_storages.split("|")
+    files_deleted = cleanFileHelper.cleanup(int(number_days_old_passed), directories_storages, 'send-mass-email')
+
+    for file in files_deleted[1]:
+        logger.info("file deleted : {}".format(file))
+
+    logger.info("finish cleannig number [{}] olds files".format(files_deleted[0]))
 
 
 if __name__ == '__main__':
@@ -235,8 +249,12 @@ if __name__ == '__main__':
         _synchronize()
         print('\nSynchronization completed successfully')
     elif args.clear:
-        _clear()
-        print('\ncleaning completed successfully')
+        try:
+            _clear()
+            print('\ncleaning completed successfully')
+        except SendMailException as sEx:
+            logger.fatal(sEx)
+            error_application(sEx)
     else:
         print(wellcome())
         name_template = _getTemplate()

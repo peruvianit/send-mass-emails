@@ -5,6 +5,7 @@ from exception.sendMailException import SendMailException
 
 class TemplateHelper:
     def __init__(self, name_template):
+
         self.name_template = name_template
         name_template_xml = 'template.xml'
         try:
